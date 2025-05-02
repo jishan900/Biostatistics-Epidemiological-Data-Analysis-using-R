@@ -1,0 +1,18 @@
+---
+title: "Final exam - data formatting for question 2"
+author: "Stefan Konigorski"
+date: "February 6, 2025"
+output:
+  html_document: default
+---
+
+```{r}
+kiggs_xyz$sex      <- factor(kiggs_xyz$sex,      labels = c("boys", "girls"))
+kiggs_xyz$age2     <- factor(kiggs_xyz$age2,     labels = c("0-1y", "2-3y", "4-5y", "6-7y", "8-9y", "10-11y", "12-13y", "14-15y", "16-17y"))
+kiggs_xyz$e017a.k <- factor(kiggs_xyz$e017a.k, labels = c("under 2500", "2500 - 2999", "3000 - 3499", "3500 - 3999", "4000 - 4499", "4500+"))
+
+kiggs_xyz$e02001    <- factor(kiggs_xyz$e02001,  labels = c("yes", "no", "don't know"))
+kiggs_xyz$e02002    <- factor(kiggs_xyz$e02002,  labels = c("yes", "no", "don't know"))
+kiggs_xyz$e02006    <- factor(kiggs_xyz$e02006,  labels = c("yes", "no", "don't know"))
+kiggs_xyz$e02009    <- factor(kiggs_xyz$e02009,  labels = c("yes", "no", "don't know"))
+```

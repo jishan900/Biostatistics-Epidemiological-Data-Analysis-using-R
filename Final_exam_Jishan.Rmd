@@ -1,0 +1,388 @@
+---
+title: "Final Exam of Biostatistics & Epidemiological Data Analysis using R"
+author: "Md Asifuzzaman Jishan"
+date: "March 1, 2025"
+output: html_document
+---
+
+
+
+## Question 1 - R Markdown [5 points] 
+As described on page 1, two files should be submitted: (1) a Word or pdf or html document with explained results, and (2) an Rmd file with the R code for the calculation of the results. Create an R Markdown file containing all relevant R code (in R chunks) that was used to calculate the results. Also include text in this R Markdown script to answer all questions so that all the requested results of the analyses (i.e. results, tables and graphs) are included and described/interpreted. Then knit the R Markdown script to a Word/pdf/html document and submit these two files. [5 points] 
+
+
+Answer: Here, I am giving you files for the final submission. The first is an RMD file, and the second is a knitted HTML document.
+
+
+## Question 2 - Import, extract and save data [6 points] 
+a) Download the SPSS data file KiGGS03_06.sav from Moodle and import it into R. [2 points] 
+b) Create a new dataframe in R named kiggs_xyz (where you should replace xyz with your name) which contains the following variables (and only these): sex (sex), age (age2), the children’s birthweight in grams (e017a.k), and whether the children have ever had pertussis (e02001), a measles infection (e02002), a scarlet fever (Streptococcus infection; e02006), a salmonella infection (e02009). [3 points] 
+c) Run the formatting steps in the provided Rmd file data_formatting.Rmd, adapted to your dataframe. Save this formatted dataframe as an RData file on your computer, e.g. on your desktop. [1 point] 
+
+Note: depending on how you imported your dataframe, the variable name might be e017a.k or e017a_k.
+
+
+```{r}
+# Install haven package for import .sav dataset
+#install.packages("haven")
+```
+
+```{r}
+library(haven)
+```
+
+```{r}
+# Import the dataset
+data <- read_sav("C:/Users/Jishan/Downloads/Exam/KiGGS03_06.sav")
+```
+
+```{r}
+head(data, 5)
+```
+
+```{r}
+colnames(data)
+```
+
+```{r}
+# Choose feature according to given variables names in the question
+kiggs_jishan <- data[, c("sex", "age2", "e017a_k", "e02001", "e02002", "e02006", "e02009")]
+```
+
+```{r}
+str(kiggs_jishan)
+```
+
+```{r}
+head(kiggs_jishan, 10)
+```
+
+```{r}
+# Choose formatting steps from the provided Rmd file which name is data_formatting.Rmd 
+kiggs_jishan$sex      <- factor(kiggs_jishan$sex,      labels = c("boys", "girls"))
+kiggs_jishan$age2     <- factor(kiggs_jishan$age2,     labels = c("0-1y", "2-3y", "4-5y", "6-7y", "8-9y", "10-11y", "12-13y", "14-15y", "16-17y"))
+kiggs_jishan$e017a_k  <- factor(kiggs_jishan$e017a_k, labels = c("under 2500", "2500 - 2999", "3000 - 3499", "3500 - 3999", "4000 - 4499", "4500+"))
+
+kiggs_jishan$e02001   <- factor(kiggs_jishan$e02001,  labels = c("yes", "no", "don't know"))
+kiggs_jishan$e02002   <- factor(kiggs_jishan$e02002,  labels = c("yes", "no", "don't know"))
+kiggs_jishan$e02006   <- factor(kiggs_jishan$e02006,  labels = c("yes", "no", "don't know"))
+kiggs_jishan$e02009   <- factor(kiggs_jishan$e02009,  labels = c("yes", "no", "don't know"))
+```
+
+
+```{r}
+# Save the formatted dataframe on my local PC
+save(kiggs_jishan, file = "kiggs_jishan.RData")
+```
+
+```{r}
+list.files()
+```
+
+## Question 3 - Data transformations and data checks [12 points] 
+a) The variables e02001, e02002, e02006, e02009 contain different diseases children might experience. As an alternative to computing all analyses with these 4 variables, we will combine them in one variable called burden. This new variable shall contain the number of diseases experienced by the children and is to be used in all further questions. Carry out the following steps: 
+  o Check that the variables e02001, e02002, e02006, e02009 are all factors. If they are not, transform them into factors. [2 points] 
+  o Set the value "don’t know" of all four variables to NA for all children. [1 point] 
+  o Delete this now empty factor level from the variables. [1 point] 
+  o Check whether these two steps worked as intended. [1 point] 
+  o Now calculate the new variable burden as the number of diseases the children had (this is a number between 0 and 4). [4 points] 
+b) Add this variable burden to your dataset kiggs_xyz, and save it in its updated form as an RData file (overwrite the previous file). [2 points] 
+c) What could be an alternative way to summarize the four variables into a summary variable? [1 point]
+
+
+```{r}
+library(dplyr)
+```
+
+
+```{r}
+# Check that the variables e02001, e02002, e02006, e02009 are all factors
+kiggs_jishan$e02001 <- as.factor(kiggs_jishan$e02001)
+kiggs_jishan$e02002 <- as.factor(kiggs_jishan$e02002)
+kiggs_jishan$e02006 <- as.factor(kiggs_jishan$e02006)
+kiggs_jishan$e02009 <- as.factor(kiggs_jishan$e02009)
+```
+
+
+```{r}
+# Confirm the structure
+str(kiggs_jishan[, c("e02001", "e02002", "e02006", "e02009")])
+```
+
+
+```{r}
+# Set the value "don’t know" of all four variables to NA for all children
+kiggs_jishan$e02001[kiggs_jishan$e02001 == "don't know"] <- NA
+kiggs_jishan$e02002[kiggs_jishan$e02002 == "don't know"] <- NA
+kiggs_jishan$e02006[kiggs_jishan$e02006 == "don't know"] <- NA
+kiggs_jishan$e02009[kiggs_jishan$e02009 == "don't know"] <- NA
+```
+
+
+```{r}
+# Delete this now empty factor level from the variables
+kiggs_jishan$e02001 <- droplevels(kiggs_jishan$e02001)
+kiggs_jishan$e02002 <- droplevels(kiggs_jishan$e02002)
+kiggs_jishan$e02006 <- droplevels(kiggs_jishan$e02006)
+kiggs_jishan$e02009 <- droplevels(kiggs_jishan$e02009)
+```
+
+
+```{r}
+# Check whether these two steps worked as intended
+summary(kiggs_jishan[, c("e02001", "e02002", "e02006", "e02009")])
+```
+
+
+```{r}
+# Convert disease variables to numeric (1 if "yes", 0 otherwise)
+kiggs_jishan$e02001 <- as.numeric(kiggs_jishan$e02001 == "yes")
+kiggs_jishan$e02002 <- as.numeric(kiggs_jishan$e02002 == "yes")
+kiggs_jishan$e02006 <- as.numeric(kiggs_jishan$e02006 == "yes")
+kiggs_jishan$e02009 <- as.numeric(kiggs_jishan$e02009 == "yes")
+
+# Compute burden as sum of diseases per child
+kiggs_jishan$burden <- rowSums(kiggs_jishan[, c("e02001", "e02002", "e02006", "e02009")], na.rm = TRUE)
+
+# Summary of the burden
+summary(kiggs_jishan$burden)
+```
+
+
+```{r}
+# Now, save the updated dataframe with burden variable
+save(kiggs_jishan, file = "kiggs_jishan.RData")
+```
+
+
+```{r}
+# Alternative way: calculate the proportion of children with at least one disease
+prop_diseased <- mean(kiggs_jishan$burden > 0, na.rm = TRUE)
+prop_diseased
+```
+
+## Question 4 - Descriptive statistics [12 points] 
+Consider the variables age2, sex and burden and describe them with regard to the following criteria: 
+a) Create one table with absolute frequencies of all three variables using the summary_table() function or a similar function. [8 points]
+b) Also indicate how many missing values each of these three variables has, and how many observations have complete data for all three variables. This can be computed outside of the table from task (a) above. [4 points]
+
+```{r}
+library(summarytools)
+```
+
+
+```{r}
+# Create a summary table consider the variables age2, sex and burden
+summary_table <- summarytools::dfSummary(kiggs_jishan[, c("age2", "sex", "burden")])
+
+# Print the table for that three features 
+print(summary_table, method = "render")
+```
+
+
+```{r}
+# Now, count the missing values for the feature age2, sex and burden
+missing_values <- data.frame(
+  Variable = c("age2", "sex", "burden"),
+  Missing_Count = c(sum(is.na(kiggs_jishan$age2)),
+                    sum(is.na(kiggs_jishan$sex)),
+                    sum(is.na(kiggs_jishan$burden)))
+)
+
+# Print the results
+print(missing_values)
+```
+
+```{r}
+# Count about the complete dataset
+complete_cases <- sum(complete.cases(kiggs_jishan[, c("age2", "sex", "burden")]))
+
+# Print the complete observations number 
+print(paste("Complete observations:", complete_cases))
+```
+
+## Question 5 – Regression [20 points] 
+Here, the aim is to use a regression model or multiple regression models to investigate whether the birthweight of a child has an effect on getting child infections.  
+a) Choose whether you want to use the burden variable or the single variables e02001, e02002, e02006, e02009. State the reason for your choice. [1 point] 
+b) Choose an appropriate regression model (linear regression, logistic regression,…). [2 points] 
+c) Compute this regression model/these regression models. [3 points] 
+d) Report the estimated regression coefficients or exponentiated regression coefficients (choose which one is more appropriate based on your model) for the birthweight variable, as well as the p-value(s) from significance tests [4 points].  
+
+Also give estimates of the 95% confidence interval of the coefficients/odds ratios for birthweight [3 points].  
+Interpret the results (statistically significant relationship yes/no) for birthweight and also interpret the coefficients/odds ratios. [6 points]. 
+
+e) In this data set, do you think this analysis is appropriate? Justify why yes/no. [1 point]
+
+
+```{r}
+library(ggplot2)
+library(stats)
+library(broom)
+```
+
+
+##### a) Answer: I am here to choose burden variables instead of four individual variables because of the simplicity. Moreover, during the statistical analysis, if I want to take those four variables separately, I need to assign more variables to fit the regression model. If I will consider the four variables separately, I need more statistical power. So, using the burden simplifies the analysis, avoids multicollinearity and also improves statistical power.
+
+
+##### b) Answer: Here, I want to apply logistic regreesion model and it will be use for binary outcomes (Yes/No). I don't want to apply linear regression because in linear regression need continuous outcome. Here, the burden is a count, not truly continuous. 
+  
+  
+##### c) Compute this regression model/these regression models. 
+
+```{r}
+# Now, convert burden into a binary variable
+kiggs_jishan$burden_binary <- ifelse(kiggs_jishan$burden > 0, 1, 0)
+
+# Fit the logistic regression model 
+logistic_model <- glm(burden_binary ~ e017a_k, data = kiggs_jishan, family = binomial)
+
+# Print the full model summary
+summary(logistic_model)
+```
+
+```{r}
+# Results are rounding values to 3 decimal places
+logistic_results <- tidy(logistic_model)
+logistic_results <- logistic_results %>%
+  mutate(estimate = round(estimate, 3),
+         std.error = round(std.error, 3),
+         statistic = round(statistic, 3),
+         p.value = round(p.value, 3))
+
+# Print the formatted results
+print(logistic_results)
+```
+
+Here, all the birthweight categories have high p-values (>> 0.05). 
+  1. e017a_k2500 - 2999: p = 0.919
+  2. e017a_k3000 - 3499: p = 0.597
+  3. e017a_k3500 - 3999: p = 0.489
+  4. e017a_k4000 - 4499: p = 0.598
+  5. e017a_k4500+: p = 0.849
+
+So, none of the birthweight categories show a statistically significant effect.
+
+Model Fit: Null Deviance (20116) vs Residual Deviance (20114)
+A very small difference means that adding birthweight did not improve model fit.
+    
+AIC Value (20126): Lower AIC suggests a better model which means a good fit, but since the difference is minimal, this model does not explain much variance.
+
+##### d) Report the estimated regression coefficients or exponentiated regression coefficients (choose which one is more appropriate based on your model) for the birthweight variable, as well as the p-value(s) from significance tests [4 points]. Also give estimates of the 95% confidence interval of the coefficients/odds ratios for birthweight [3 points]. Interpret the results (statistically significant relationship yes/no) for birthweight and also interpret the coefficients/odds ratios. [6 points]. 
+
+```{r}
+# Extract the logistic regression model results
+logistic_model_results <- tidy(logistic_model, exponentiate = TRUE, conf.int = TRUE)
+
+# Format results
+logistic_table <- logistic_model_results %>%
+  select(term, estimate, p.value, conf.low, conf.high) %>%
+  rename(Odds_Ratio = estimate, P_Value = p.value, CI_Lower = conf.low, CI_Upper = conf.high)
+
+# Print the final table
+knitr::kable(logistic_table, caption = "Logistic Regression Results", digits = 3)
+```
+
+Here, the interpretation of the Logistic Regression model results: 
+
+First of all, Statistical Significance (Yes/No)
+We can observe that, all of the p-values are greater than 0.05
+        1. e017a_k2500 - 2999: p = 0.919
+        2. e017a_k3000 - 3499: p = 0.597
+        3. e017a_k3500 - 3999: p = 0.489
+        4. e017a_k4000 - 4499: p = 0.598
+        5. e017a_k4500+: p = 0.849
+ince all of p-values are greater than 0.05, birthweight is not statistically significant.
+
+
+Interpretation of the Odds Ratios results: 
+Odds Ratios (exp(Estimate))
+        If > 1 → Higher birthweight increases infection risk.
+        If < 1 → Higher birthweight decreases infection risk.
+        If ≈ 1 → No meaningful effect of birthweight on infection risk.
+
+Birthweight 	  Odds Ratio	      Interpretation
+2500 - 2999g	    0.991	    Almost the same risk as the reference group
+3000 - 3499g	    1.042	    Slightly higher odds, but not significant
+3500 - 3999g	    1.056	    Slightly higher odds, but not significant
+4000 - 4499g	    1.049	    Slightly higher odds, but not significant
+4500g+	          0.972	    Slightly lower odds, but not significant
+
+Lastly we must say that, since all odds ratios are close to 1, birthweight does not meaningfully impact infection risk.
+Confidence Intervals: Since all confidence intervals contain 1, birthweight does not have a statistically significant.
+
+
+##### e) In this data set, do you think this analysis is appropriate? Justify why yes/no. [1 point]
+Answer: Yes, the logistic regression model is appropriate for the given dataset.
+
+Justification:
+    1. Logistic regression is the correct model for predicting binary outcomes.
+    2. e017a_k represents birthweight categories, which is making it suitable for logistic regression model. This model assesses that the whether birthweight categories affect infection risk.
+    3. Odds ratios are confirm whether different birthweight groups increase or decrease infection risk factor. On the other hand, the confidence intervals and p-values confirm that these effects are statistically significant or not.
+
+
+
+## Question 6 – Sample size calculation [7 points] 
+Now, the aim is to perform a sample size calculation for a new study to investigate the effect of birthweight of a child as continuous variable on getting child infections (more than 5 within the first 5 years of life vs less than 5 within the first 5 years of life). We will consider using a t-test for the analysis. 
+
+a) Think about what an effect size measure can be. Look at the literature or think for yourself based on expert knowledge what effect size you would expect. State the effect size that you are assuming and explain why. [2 points] 
+b) Discuss potential disadvantages of using a t-test for the analysis and for the sample size calculation. [2 points] 
+c) Now compute the minimum necessary sample size for a power of 80% and a significance threshold of alpha = 0.05, for example by using a function in the R package pwr. What is the sample size? [2 points] 
+d) Do you think this is a good study, or do you see any major weaknesses in the study design or sample size calculation? [1 point]
+
+
+##### a) Think about what an effect size measure can be. Look at the literature or think for yourself based on expert knowledge what effect size you would expect. State the effect size that you are assuming and explain why. [2 points]
+Answer: Effect Size Measurement is Cohen’s d which is measures standardized mean difference.
+        Assumed Effect Size: d = 0.5 (moderate effect size).
+        Justification: In the birthweight, which is expected to have a moderate impact on the infection risk based on the prior of the epidemiological studies, and Cohen’s d is appropriate for the comparing of two groups in a t-test framework.
+
+##### b) Discuss potential disadvantages of using a t-test for the analysis and for the sample size calculation. [2 points] 
+Answer: The disadvantages of Using a t-test is: 
+    1. A t-test assumes normally distributed data, but birthweight and infection counts may not be normal.
+    2. The outcome of ≤5 vs. >5 infections is categorical. A t-test is use for continuous variables. A logistic regression method will be more appropriate.
+    3. A t-test assumes equal variance (homoscedasticity) in the both groups, but birthweight distributions may differ, violating this assumption.
+    4. Small samples size may reduce the statistical power, which is making the effect size of estimate unstable.
+    5. A t-test only compares two groups and does not adjust for factors. 
+
+##### c) Now compute the minimum necessary sample size for a power of 80% and a significance threshold of alpha = 0.05, for example by using a function in the R package pwr. What is the sample size? [2 points] 
+
+
+```{r}
+# Install pwr package 
+#install.packages("pwr")
+```
+
+
+```{r}
+library(pwr)
+```
+
+
+```{r}
+# Define parameters in the chunk 
+effect_size <- 0.5  
+alpha <- 0.05       
+power <- 0.8  
+
+# Now, compute the required sample size for a two-sample t-test
+sample_size <- pwr.t.test(d = effect_size, power = power, sig.level = alpha, type = "two.sample")$n
+
+# Print the required sample size each group
+print(paste("Minimum required sample size each group:", ceiling(sample_size)))
+```
+Here, 
+  1. d = 0.5 assumes a moderate effect size.
+  2. power = 0.8 ensures an 80% probability.
+  3. sig.level = 0.05 sets the significance threshold at 5%.
+The final Sample Size Result is approximately 64 participants per group and 128 in total.
+
+
+##### d) Do you think this is a good study, or do you see any major weaknesses in the study design or sample size calculation? [1 point]
+Answer: In this study has both strengths and weaknesses.
+The strengths are:
+  1. Implement a standard hypothesis testing approach with a t-test.
+  2. The sample size calculation ensures adequate power (80%).
+  3. Birthweight is treated as a continuous variable.
+
+The weaknesses are:
+  1. Since the outcome (≤5 vs. >5 infections) is binary, a logistic regression model would be more appropriate than a t-test.
+  2. The assumed effects size is d = 0.5 which is moderate. 
