@@ -10,7 +10,7 @@ The analysis explores and visualizes epidemiological data using statistical meth
 - Regression models
 - Hypothesis testing
 - Confidence intervals
-
+ 
 The work is presented as an HTML document generated from R Markdown (`.Rmd`) using the **RStudio** environment, ensuring full reproducibility and interactivity.
 
 ## Files Included
