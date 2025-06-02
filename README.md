@@ -14,6 +14,7 @@ The analysis explores and visualizes epidemiological data using statistical meth
  
 The work is presented as an HTML document generated from R Markdown (`.Rmd`) using the **RStudio** environment, ensuring full reproducibility and interactivity.
 
+
 ## Files Included
 
 - `Final_exam_Jishan.html`: The rendered HTML report containing the complete analysis and visualizations.
